@@ -37,7 +37,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  get-label-type:
+    name: get-label-type
+    uses: ./.github/workflows/_runner-determinator.yml
+    with:
+      triggering_actor: ${{ github.triggering_actor }}
+      issue_owner: ${{ github.event.pull_request.user.login || github.event.issue.user.login }}
+      curr_branch: ${{ github.head_ref || github.ref_name }}
+      curr_ref_type: ${{ github.ref_type }}
   libtorch-cpu-shared-with-deps-cxx11-abi-build:
+    needs: get-label-type
     if: ${{ github.repository_owner == 'pytorch' }}
     uses: ./.github/workflows/_binary-build-linux.yml
     with:
@@ -51,7 +60,7 @@ jobs:
       DOCKER_IMAGE: pytorch/libtorch-cxx11-builder:cpu-main
       LIBTORCH_VARIANT: shared-with-deps
       DESIRED_DEVTOOLSET: cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       build_name: libtorch-cpu-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
     secrets:
@@ -73,7 +82,7 @@ jobs:
       DESIRED_DEVTOOLSET: cxx11-abi
       build_name: libtorch-cpu-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       runs_on: linux.4xlarge
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -102,6 +111,7 @@ jobs:
     uses: ./.github/workflows/_binary-upload.yml
 
   libtorch-cuda11_8-shared-with-deps-cxx11-abi-build:
+    needs: get-label-type
     if: ${{ github.repository_owner == 'pytorch' }}
     uses: ./.github/workflows/_binary-build-linux.yml
     with:
@@ -116,7 +126,7 @@ jobs:
       DOCKER_IMAGE: pytorch/libtorch-cxx11-builder:cuda11.8-main
       LIBTORCH_VARIANT: shared-with-deps
       DESIRED_DEVTOOLSET: cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       build_name: libtorch-cuda11_8-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
     secrets:
@@ -139,7 +149,7 @@ jobs:
       DESIRED_DEVTOOLSET: cxx11-abi
       build_name: libtorch-cuda11_8-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       runs_on: linux.4xlarge.nvidia.gpu
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -169,6 +179,7 @@ jobs:
     uses: ./.github/workflows/_binary-upload.yml
 
   libtorch-cuda12_1-shared-with-deps-cxx11-abi-build:
+    needs: get-label-type
     if: ${{ github.repository_owner == 'pytorch' }}
     uses: ./.github/workflows/_binary-build-linux.yml
     with:
@@ -183,7 +194,7 @@ jobs:
       DOCKER_IMAGE: pytorch/libtorch-cxx11-builder:cuda12.1-main
       LIBTORCH_VARIANT: shared-with-deps
       DESIRED_DEVTOOLSET: cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       build_name: libtorch-cuda12_1-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
     secrets:
@@ -206,7 +217,7 @@ jobs:
       DESIRED_DEVTOOLSET: cxx11-abi
       build_name: libtorch-cuda12_1-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       runs_on: linux.4xlarge.nvidia.gpu
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -236,6 +247,7 @@ jobs:
     uses: ./.github/workflows/_binary-upload.yml
 
   libtorch-cuda12_4-shared-with-deps-cxx11-abi-build:
+    needs: get-label-type
     if: ${{ github.repository_owner == 'pytorch' }}
     uses: ./.github/workflows/_binary-build-linux.yml
     with:
@@ -250,7 +262,7 @@ jobs:
       DOCKER_IMAGE: pytorch/libtorch-cxx11-builder:cuda12.4-main
       LIBTORCH_VARIANT: shared-with-deps
       DESIRED_DEVTOOLSET: cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       build_name: libtorch-cuda12_4-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
     secrets:
@@ -273,7 +285,7 @@ jobs:
       DESIRED_DEVTOOLSET: cxx11-abi
       build_name: libtorch-cuda12_4-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       runs_on: linux.4xlarge.nvidia.gpu
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -303,6 +315,7 @@ jobs:
     uses: ./.github/workflows/_binary-upload.yml
 
   libtorch-rocm6_0-shared-with-deps-cxx11-abi-build:
+    needs: get-label-type
     if: ${{ github.repository_owner == 'pytorch' }}
     uses: ./.github/workflows/_binary-build-linux.yml
     with:
@@ -317,7 +330,7 @@ jobs:
       DOCKER_IMAGE: pytorch/libtorch-cxx11-builder:rocm6.0-main
       LIBTORCH_VARIANT: shared-with-deps
       DESIRED_DEVTOOLSET: cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       build_name: libtorch-rocm6_0-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
     secrets:
@@ -410,6 +423,7 @@ jobs:
     uses: ./.github/workflows/_binary-upload.yml
 
   libtorch-rocm6_1-shared-with-deps-cxx11-abi-build:
+    needs: get-label-type
     if: ${{ github.repository_owner == 'pytorch' }}
     uses: ./.github/workflows/_binary-build-linux.yml
     with:
@@ -424,7 +438,7 @@ jobs:
       DOCKER_IMAGE: pytorch/libtorch-cxx11-builder:rocm6.1-main
       LIBTORCH_VARIANT: shared-with-deps
       DESIRED_DEVTOOLSET: cxx11-abi
-      runner_prefix: amz2023.
+      runner_prefix: "${{ needs.get-label-type.outputs.label-type }}amz2023."
       build_name: libtorch-rocm6_1-shared-with-deps-cxx11-abi
       build_environment: linux-binary-libtorch-cxx11-abi
     secrets:
