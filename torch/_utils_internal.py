@@ -150,6 +150,8 @@ def log_torch_jit_trace_exportability(
 def export_api_rollout_check() -> bool:
     return False
 
+def export_api_rollout_check_export() -> bool:
+    return False
 
 def justknobs_check(name: str) -> bool:
     """

@@ -66,9 +66,9 @@ def capture_pre_autograd_graph_warning():
     log.warning("|     !!!   WARNING   !!!    |")
     log.warning("+============================+")
     log.warning("capture_pre_autograd_graph() is deprecated and doesn't provide any function guarantee moving forward.")
-    log.warning("Please switch to use torch.export instead.")
+    log.warning("Please switch to use torch.export._trace._export_for_training instead.")
     if config.is_fbcode():
-        log.warning("Unless the unittest is in the blocklist, capture_pre_autograd_graph() will fallback to torch.export.")
+        log.warning("Unless the unittest is in the blocklist, capture_pre_autograd_graph() will fallback to torch.export._trace._export_for_training.")
 
 
 @compatibility(is_backward_compatible=False)
@@ -110,7 +110,7 @@ def capture_pre_autograd_graph(
 
     """
     from torch.export._trace import _extract_fake_inputs, DEFAULT_EXPORT_DYNAMO_CONFIG, _ignore_backend_decomps
-    from torch._utils_internal import export_api_rollout_check
+    from torch._utils_internal import export_api_rollout_check, export_api_rollout_check_export
     from torch._export.non_strict_utils import make_constraints
     from torch._subclasses.functional_tensor import FunctionalTensor
     from torch.export._unlift import _create_stateful_graph_module
@@ -129,9 +129,15 @@ def capture_pre_autograd_graph(
     if export_api_rollout_check():
         @lru_cache
         def print_export_warning():
-            log.warning("Using torch.export._trace._export")
+            log.warning("Using torch.export._trace._export_for_training(...,strict=True)")
         print_export_warning()
-        module = torch.export._trace._export(f, args, kwargs, dynamic_shapes=dynamic_shapes, pre_dispatch=True).module()
+        module = torch.export._trace._export_for_training(f, args, kwargs, dynamic_shapes=dynamic_shapes, strict=True).module()
+    elif export_api_rollout_check_export():
+        @lru_cache
+        def print_export_warning_export():
+            log.warning("Using torch.export._trace._export")
+        print_export_warning_export()
+        module = torch.export._trace._export(f, args, kwargs, dynamic_shapes=dynamic_shapes, pre_dispatch=True).module()     
     else:
         log_export_usage(event="export.private_api", flags={"capture_pre_autograd_graph"})
 
