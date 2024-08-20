@@ -539,10 +539,14 @@ class VariableBuilder:
             result = CustomizedDictVariable.wrap(self, value)
             result.source = self.source
             return self.tx.output.side_effects.track_object_existing(value, result)
+        elif istype(value, set):
+            self.install_guards(GuardBuilder.EQUALS_MATCH)
+            result = ConstantVariable.create(value=value)
+            return self.set_source_and_track_mutable(value, result)
         elif istype(value, (dict, collections.defaultdict, collections.OrderedDict)):
             self.install_guards(GuardBuilder.SEQUENCE_LENGTH)
 
-            # Optimisation for the common case strings, ints, etc
+            # Optimization for the common case strings, ints, etc
             all_const = all(ConstantVariable.is_literal(k) for k in value.keys())
             if all_const:
                 # TODO(anijain2305) - Do we have to guard on all the keys? Can
@@ -560,7 +564,7 @@ class VariableBuilder:
                 # 2) For non-constant objects, we also have to guard on the keys
                 # (like TENSOR_MATCH on tensor). We might also have guards on
                 # the attributes of the keys (like tensor.grad). To make this
-                # work in tree strucutre is complicated.
+                # work in tree structure is complicated.
                 #
                 # So, instead we guard on the key order. While guarding on key
                 # order, we just save the indices and use it to access keys and

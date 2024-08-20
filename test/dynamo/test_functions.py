@@ -3306,6 +3306,46 @@ class DefaultsTests(torch._dynamo.test_case.TestCase):
 
         self.assertEqual(fn(z), fn_opt(z))
 
+    def test_add_global_set(self):
+        # This fail with enable_cpp_guard_manager = True.
+        torch._dynamo.config.enable_cpp_guard_manager = False
+
+        ss = set()
+
+        cnts = torch._dynamo.testing.CompileCounter()
+
+        @torch.compile(backend=cnts, fullgraph=True)
+        def fn(x):
+            ss.add("ji")
+            f = 1
+            if ss.__contains__("hi"):
+                f = 2
+            x = x * f
+            return x
+
+        x = torch.ones(10)
+        fn(x)
+        self.assertEqual(cnts.frame_count, 1)
+
+        print(ss)
+        # This should recompile.
+        fn(x)
+        self.assertEqual(cnts.frame_count, 2)
+
+        # This should not recompile.
+        fn(x)
+        self.assertEqual(cnts.frame_count, 2)
+
+        # This should recompile.
+        ss.add("my name")
+        fn(x)
+        self.assertEqual(cnts.frame_count, 3)
+
+        # This should recompile.
+        ss.discard("ji")
+        fn(x)
+        self.assertEqual(cnts.frame_count, 4)
+
     def test_is_init_in_compile_vmapped_mutated_tensor_tensor(self):
         def fn(z):
             x = z.clone()
