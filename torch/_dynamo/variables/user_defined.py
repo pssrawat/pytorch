@@ -8,7 +8,6 @@ import inspect
 import itertools
 import random
 import sys
-import threading
 import types
 import warnings
 from typing import Dict, Generic, List, TYPE_CHECKING
@@ -880,23 +879,30 @@ class UserDefinedObjectVariable(UserDefinedVariable):
         return get_custom_getattr(self.value)
 
     def _getattr_static(self, name):
+        subobj = inspect.getattr_static(self.value, name, NO_SUCH_SUBOBJ)
+        import _collections
+
+        # In some cases, we have to do dynamic lookup because getattr_static is not enough. For example, threading.local
+        # has side-effect free __getattribute__ and the attribute is not visible without a dynamic lookup.
         if (
-            isinstance(self.value, PyTreeSpec)
-            or "__slots__" in self.value.__class__.__dict__
-            or type(self.value) == threading.local
+            # When the dynamic lookup is necessary, e.g., threading.local
+            subobj is NO_SUCH_SUBOBJ
+            # This is somewhat ugly but no other easy way. For named tuples, field values are represented by an internal
+            # data structure called _tuplegetter.
+            or isinstance(subobj, _collections._tuplegetter)
+            # For __slots__ and member descriptors, directly look into the __slots__
+            or (inspect.ismemberdescriptor(subobj) and name in self.value.__slots__)
+            # TODO(anijain2305) - Maybe types.BuiltinFunctionType should go in is_wrapper_or_member_descriptor
+            # For property with C-defined fget, directly access the property
+            or (
+                isinstance(subobj, property)
+                and isinstance(subobj.fget, types.BuiltinFunctionType)
+            )
         ):
-            try:
-                cls_var = inspect.getattr_static(
-                    self.value.__class__, name, NO_SUCH_SUBOBJ
-                )
-                if cls_var is not NO_SUCH_SUBOBJ and name not in self.value.__dict__:
-                    # maybe user-defined @property that we need to inline
-                    return cls_var
-            except AttributeError:
-                pass  # __slots__
-            subobj = getattr(self.value, name)
-        else:
-            subobj = inspect.getattr_static(self.value, name)
+            # Call __getattribute__, we have already checked that this is not overridden and side-effect free. We don't
+            # want to call getattr because it can be user-overridden.
+            subobj = self.value.__getattribute__(name)
+
         return subobj
 
     def has_key_in_generic_dict(self, tx: "InstructionTranslator", key):
