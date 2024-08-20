@@ -42,7 +42,7 @@ jobs:
     name: win-vs2022-xpu-py3
     uses: ./.github/workflows/_win-build.yml
     with:
-      build-environment: xpu-py3.10
+      build-environment: win-vs2022-xpu-py3
       cuda-version: cpu
       use-xpu: true
       vc-year: '2022'
