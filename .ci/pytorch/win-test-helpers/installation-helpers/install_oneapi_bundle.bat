@@ -34,4 +34,5 @@ if "%INSTALL_FRESH_ONEAPI%"=="1" (
     start /wait "Intel Pytorch Bundle Installer" "oneapi_bundle.exe" --action=install --eula=accept --silent --log-dir install_bundle
     if errorlevel 1 exit /b
     if not errorlevel 0 exit /b
+    rm oneapi_bundle.exe
 )

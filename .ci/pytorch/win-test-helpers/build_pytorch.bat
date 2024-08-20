@@ -78,9 +78,7 @@ set PATH=%CUDA_PATH%\bin;%CUDA_PATH%\libnvvp;%PATH%
 
 if not "%USE_XPU%"=="1" goto xpu_build_end
 
-set PYTHON_VERSION='3.10'
 set VS2022INSTALLDIR='C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools'
-set CONDA_ENV='xpu_venv'
 
 :xpu_build_end
 
@@ -127,14 +125,6 @@ if "%USE_XPU%"=="1" (
       call .ci\pytorch\win-test-helpers\installation-helpers\install_oneapi_bundle.bat
       echo "oneAPI bundle installed"
   )
-
-  :: Set up conda environment
-  call %CONDA_PARENT_DIR%\Miniconda3\Scripts\activate.bat
-  call conda remove -n %CONDA_ENV% --all -y
-  call conda create -n %CONDA_ENV% python=%PYTHON_VERSION% -y
-  call conda activate %CONDA_ENV%
-  call conda install cmake==3.26.4 ninja -y
-  call pip install pyyaml
 )
 
 :: Print all existing environment variable for debugging
