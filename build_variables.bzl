@@ -473,7 +473,10 @@ inductor_core_resources = [
     "torch/csrc/inductor/aoti_torch/mkldnn_tensor.cpp",
     "torch/csrc/inductor/aoti_torch/oss_proxy_executor.cpp",
     "torch/csrc/inductor/inductor_ops.cpp",
+    "torch/csrc/api/src/serialize/input-archive.cpp",
+    "torch/csrc/api/src/serialize/output-archive.cpp",
 ]
+
 
 libtorch_core_sources = sorted(
     core_sources_common +
